@@ -25,8 +25,6 @@ const timeInterval = 5000
  */
 const getRequestCache = function (reqList, config) {
   const ci = CacheItem.getCache(reqList, config) // 获取缓存实例
-  console.log(reqList);
-  console.log(ci);
   if (ci) { // 有缓存数据
     const cur = new Date().getTime();
     if (cur < ci.expireDate) { // 判断缓存是否过期:没有过期
@@ -39,7 +37,6 @@ const getRequestCache = function (reqList, config) {
       reqList.splice(index, 1)
     }
   }
-  // console.log(reqList);
   CacheItem.push(reqList, new CacheItem(config))
 }
 
@@ -51,7 +48,6 @@ const getRequestCache = function (reqList, config) {
 const setRequestData = function (reqList, response) {
   const index = CacheItem.getIndex(reqList, response.config)
   const ci = reqList[index]
-  // console.log('ci',ci);
   ci.setExpireDate(timeInterval) // 设置过期时间
   ci.setResponse(response.data)// 设置缓存数据
 }
@@ -76,7 +72,6 @@ const request = axios.create({
 request.interceptors.request.use(
   config => {
     // do something before request is sent
-    console.log('config:::', config);
 
     /**
      * 为每一次请求生成一个cancleToken
