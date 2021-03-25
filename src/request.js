@@ -17,7 +17,7 @@ import {CacheList, CacheItem} from './requestCache'
 let reqList = new CacheList() // 创建缓存列表实例
 
 // 缓存时长
-const timeInterval = 5000
+const timeInterval = 5 * 1000
 
 /**
  * 查看请求缓存
@@ -27,6 +27,7 @@ const timeInterval = 5000
 const getRequestCache = function (reqList, config) {
   const ci = reqList.getCache(config) // 获取缓存实例
   if (ci) { // 有缓存数据
+    ci.startLoading()
     const cur = new Date().getTime();
     if (cur < ci.expireDate) { // 判断缓存是否过期:没有过期
       ci.setWeights() // 怎加权重
@@ -50,7 +51,7 @@ const getRequestCache = function (reqList, config) {
  * @param {string} response 相应实例
  */
 const setRequestData = function (reqList, response) {
-  const ci = reqList.getCache(config) // 获取缓存实例
+  const ci = reqList.getCache(response.config) // 获取缓存实例
   ci.setExpireDate(timeInterval) // 设置过期时间
   ci.setResponse(response.data)// 设置缓存数据
 }
@@ -113,11 +114,13 @@ request.interceptors.response.use(
 const cacheRequest = (config) => {
   const params = CacheItem.getParams(config)
   config._loadingCallback = params._loadingCallback
-  config._noCache = params._noCache
+  config._cache = params._cache || false
+  config._clearCache = params._clearCache
   delete params._loadingCallback
-  delete params._noCache
+  delete params._cache
+  delete params._clearCache
   const response = getRequestCache(reqList, config)
-  if (!config._noCache) {
+  if (config._cache) {
     if (response) return response // 有缓存返回缓存
   }
   return request(config)

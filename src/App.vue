@@ -1,6 +1,7 @@
 <template>
   <div>
     <img alt="Vue logo" src="./assets/logo.png" />
+    <button @click="onClear">clear</button>
     <HelloWorld @getList="getList" msg="Hello Vue 3 + Vite222" />
     <p v-for="item in list" :key="item.id">{{ item.name }}</p>
   </div>
@@ -10,6 +11,8 @@
 import HelloWorld from "./components/HelloWorld.vue";
 import { ref } from "vue";
 import { fetchList } from "./service.js";
+
+let clearCache = () => {};
 export default {
   name: "App",
   data() {
@@ -23,15 +26,22 @@ export default {
 
     const list = ref([]);
 
+    let onClear = () => {
+      clearCache();
+    };
+
     const getList = () => {
       var num = Math.floor(Math.random() * 100 + 1);
       const data = {
         page: 1,
         pageSize: 10,
         _loadingCallback: (l) => {
-          console.log('loading:::', l)
+          console.log("loading:::", l);
         },
-        _noCache: true,
+        _cache: true,
+        _clearCache: (clear) => {
+          clearCache = clear;
+        },
       };
       fetchList(data).then((res) => {
         console.log("APP:::", res);
@@ -43,6 +53,7 @@ export default {
     return {
       list,
       getList,
+      onClear,
     };
   },
 };

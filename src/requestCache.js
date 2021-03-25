@@ -10,6 +10,7 @@ export class CacheItem {
         this.loading = false // false 结束 true 进行中
         this.loadingCallback = () => { } // loading回调
         this.loadingInit(config)
+        this.clearCacheInit(config)
     }
     // loading 初始化
     loadingInit(config) {
@@ -17,6 +18,17 @@ export class CacheItem {
             this.loadingCallback = config._loadingCallback
             this.startLoading()
         }
+    }
+    // 清除缓存 初始化
+    clearCacheInit(config) {
+        if(config._clearCache) {
+            config._clearCache(this.clearSelf)
+        }
+    }
+    
+
+    clearSelf() {
+        console.log('clearSelf', this);
     }
 
     startLoading() {
