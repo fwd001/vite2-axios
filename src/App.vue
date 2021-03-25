@@ -28,10 +28,14 @@ export default {
       const data = {
         page: 1,
         pageSize: 10,
+        _loadingCallback: (l) => {
+          console.log('loading:::', l)
+        },
+        _noCache: true,
       };
       fetchList(data).then((res) => {
         console.log("APP:::", res);
-        list.value = res.data.list;
+        list.value = res && res.data && res.data.list;
       });
     };
     getList();

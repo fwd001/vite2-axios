@@ -1,11 +1,34 @@
 export class CacheItem {
     constructor(config) {
         this.url = config.url;
-        this.params = CacheItem.setParams(config)
+        this.params = CacheItem.getParams(config)
         this.expireDate = 0;
         this.response = {};
         this.weights = 0;
-        this.c = () => {}
+        this.c = () => { };
+        this.loading = false // false 结束 true 进行中
+        this.loadingCallback = () => { } // loading回调
+        this.loadingInit(config)
+    }
+    // loading 初始化
+    loadingInit(config) {
+        if (config._loadingCallback) {
+            this.loadingCallback = config._loadingCallback
+            this.startLoading()
+        }
+    }
+
+    startLoading() {
+        this.loading = true
+        this.loadingCallback(this.loading)
+    }
+    static endLoading(reqList, config) {
+        const ci = reqList.getCache(config)
+        const flag = ci.loading
+        ci.loading = false
+        if (flag && reqList.isLoading()) {
+            ci.loadingCallback(ci.loading)
+        }
     }
 
     // 设置时间
@@ -29,12 +52,12 @@ export class CacheItem {
     }
 
     // 设置取消函数
-    setCancel(c = ()=>{}) {
-        this.c = c
+    setCancel(cancel = () => {}) {
+        this.c = cancel
     }
 
     //   设置Params
-    static setParams(config) {
+    static getParams(config) {
         let params = null
         if (config.params) {
             params = config.params;
@@ -56,7 +79,7 @@ export class CacheList {
         const item = this.value.find(ele => {
             let flag = false
             if (ele.url === config.url) {
-                const params = CacheItem.setParams(config)
+                const params = CacheItem.getParams(config)
                 const cParams = ele.params
                 if (CacheList.deepEqual(params, cParams)) {
                     flag = true
@@ -72,7 +95,7 @@ export class CacheList {
         let index = -1
         const _index = this.value.findIndex(ele => {
             if (ele.url === config.url) {
-                const params = CacheItem.setParams(config)
+                const params = CacheItem.getParams(config)
                 const cParams = ele.params
                 if (CacheList.deepEqual(params, cParams)) {
                     return true
@@ -90,19 +113,23 @@ export class CacheList {
 
     // 删除元素
     delItem(config) {
-        const index = this.getIndex(config) 
+        const index = this.getIndex(config)
         this.delIndex(index)
     }
 
     // 添加缓存，控制缓存 总数
     push(item) {
         if (this.value.length >= this.cacheApiLength) {
-            this.value.sort((a, b)=> b.weights - a.weights)
+            this.value.sort((a, b) => b.weights - a.weights)
             this.value.pop()
         }
         this.value.push(item)
     }
-    
+    // 判断是否还有loading 请求未结束
+    isLoading() {
+        return this.value.every(v => v.loading === false)
+    }
+
     /*
      * 判断两个对象相等
      * @param x {Object} 对象1

@@ -10,10 +10,10 @@ export function fetchList(query) {
 }
 
 export function fetchAdd(data) {
-    return request({
-      url: '/api/add',
-      method: 'post',
-      data,
-    })
-  }
+  return request({
+    url: '/api/add',
+    method: 'post',
+    data,
+  })
+}
 
