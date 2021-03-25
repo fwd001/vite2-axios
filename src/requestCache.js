@@ -1,3 +1,4 @@
+// 缓存实例
 export class CacheItem {
     constructor(config) {
         this.url = config.url;
@@ -68,6 +69,7 @@ export class CacheItem {
     }
 }
 
+// 缓存仓库
 export class CacheList {
     constructor(cacheApiLength = 10) {
         this.value = []
