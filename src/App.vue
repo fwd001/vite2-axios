@@ -35,10 +35,13 @@ export default {
       const data = {
         page: 1,
         pageSize: 10,
+        // loading 回调函数
         _loadingCallback: (l) => {
           console.log("loading:::", l);
         },
+        // 是否使用缓存
         _cache: true,
+        // TODO： 清除缓存方法 
         _clearCache: (clear) => {
           clearCache = clear;
         },
