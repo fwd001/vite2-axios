@@ -1,9 +1,10 @@
 import axios from 'axios'
-import CacheItem from './cacheItem'
+import {CacheList, CacheItem} from './requestCache'
 
 
 // 缓存的请求列表
 /**
+ * @param {number} cacheApiLength - 当前缓存数量，默认10个请求
  * {
  *  url: '',
  *  params: {},
@@ -13,7 +14,7 @@ import CacheItem from './cacheItem'
  *  cancel: ()=> {} // 取消方法
  * }
  */
-let reqList = []
+let reqList = new CacheList() // 创建缓存列表实例
 
 // 缓存时长
 const timeInterval = 5000
@@ -24,20 +25,19 @@ const timeInterval = 5000
  * @param {string} config - 当前请求参数实例
  */
 const getRequestCache = function (reqList, config) {
-  const ci = CacheItem.getCache(reqList, config) // 获取缓存实例
+  const ci = reqList.getCache(config) // 获取缓存实例
   if (ci) { // 有缓存数据
     const cur = new Date().getTime();
     if (cur < ci.expireDate) { // 判断缓存是否过期:没有过期
-      ci.setWeights()
+      ci.setWeights() // 怎加权重
       return Promise.resolve(ci.response)
     } else {
       if(ci.expireDate === 0) ci.c() //如果在请求中 取消上一次请求
       // 删除数组中的缓存
-      const index = CacheItem.getIndex(reqList, config) 
-      reqList.splice(index, 1)
+      reqList.delItem(config)
     }
   }
-  CacheItem.push(reqList, new CacheItem(config))
+  reqList.push(new CacheItem(config))
 }
 
 /**
@@ -46,15 +46,14 @@ const getRequestCache = function (reqList, config) {
  * @param {string} response 相应实例
  */
 const setRequestData = function (reqList, response) {
-  const index = CacheItem.getIndex(reqList, response.config)
-  const ci = reqList[index]
+  const ci = reqList.getCache(config) // 获取缓存实例
   ci.setExpireDate(timeInterval) // 设置过期时间
   ci.setResponse(response.data)// 设置缓存数据
 }
 
 // 设置取消函数
 const setCancel = (reqList, config, c) => {
-  const ci = CacheItem.getCache(reqList, config) // 获取缓存实例
+  const ci = reqList.getCache(config) // 获取缓存实例
   ci.setCancel(c)
 }
 

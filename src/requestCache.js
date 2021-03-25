@@ -1,6 +1,4 @@
-const CacheApiLength = 10
-
-export default class CacheItem {
+export class CacheItem {
     constructor(config) {
         this.url = config.url;
         this.params = CacheItem.setParams(config)
@@ -45,15 +43,22 @@ export default class CacheItem {
         }
         return params
     }
+}
+
+export class CacheList {
+    constructor(cacheApiLength = 10) {
+        this.value = []
+        this.cacheApiLength = cacheApiLength
+    }
 
     // 返回缓存 undefined为没有缓存 
-    static getCache(reqList = [], config) {
-        const item = reqList.find(item => {
+    getCache(config) {
+        const item = this.value.find(ele => {
             let flag = false
-            if (item.url === config.url) {
-                const params = this.setParams(config)
-                const cParams = item.params
-                if (CacheItem.deepEqual(params, cParams)) {
+            if (ele.url === config.url) {
+                const params = CacheItem.setParams(config)
+                const cParams = ele.params
+                if (CacheList.deepEqual(params, cParams)) {
                     flag = true
                 }
             }
@@ -63,13 +68,13 @@ export default class CacheItem {
     }
 
     // 返回缓存下标 -1 没找到
-    static getIndex(reqList = [], config) {
+    getIndex(config) {
         let index = -1
-        const _index = reqList.findIndex(item => {
-            if (item.url === config.url) {
-                const params = this.setParams(config)
-                const cParams = item.params
-                if ( CacheItem.deepEqual(params, cParams)) {
+        const _index = this.value.findIndex(ele => {
+            if (ele.url === config.url) {
+                const params = CacheItem.setParams(config)
+                const cParams = ele.params
+                if (CacheList.deepEqual(params, cParams)) {
                     return true
                 }
             }
@@ -77,16 +82,27 @@ export default class CacheItem {
         index = _index
         return index
     }
-    // 添加缓存，控制缓存 总数
-    static push(reqList = [], item) {
-        if (reqList.length >= CacheApiLength) {
-            reqList.sort((a, b)=> b.weights - a.weights)
-            reqList.pop()
-        }
-        reqList.push(item)
+
+    // 按照下标删除元素
+    delIndex(index) {
+        this.value.splice(index, 1)
     }
 
+    // 删除元素
+    delItem(config) {
+        const index = this.getIndex(config) 
+        this.delIndex(index)
+    }
 
+    // 添加缓存，控制缓存 总数
+    push(item) {
+        if (this.value.length >= this.cacheApiLength) {
+            this.value.sort((a, b)=> b.weights - a.weights)
+            this.value.pop()
+        }
+        this.value.push(item)
+    }
+    
     /*
      * 判断两个对象相等
      * @param x {Object} 对象1
@@ -107,7 +123,7 @@ export default class CacheItem {
 
             for (var prop in x) {
                 if (y.hasOwnProperty(prop)) {
-                    if (!CacheItem.deepEqual(x[prop], y[prop])) return false;
+                    if (!CacheList.deepEqual(x[prop], y[prop])) return false;
                 } else return false;
             }
 
