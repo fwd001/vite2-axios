@@ -12,7 +12,6 @@ import HelloWorld from "./components/HelloWorld.vue";
 import { ref } from "vue";
 import { fetchList } from "./service.js";
 
-let clearCache = () => {};
 export default {
   name: "App",
   data() {
@@ -25,12 +24,16 @@ export default {
     console.log("setup");
 
     const list = ref([]);
+    let _clearCache = () => {}
 
     let onClear = () => {
-      clearCache();
+      _clearCache();
     };
 
+    let time = 0
+
     const getList = () => {
+      time++
       var num = Math.floor(Math.random() * 100 + 1);
       const data = {
         page: 1,
@@ -41,14 +44,17 @@ export default {
         },
         // 是否使用缓存
         _cache: true,
-        // TODO： 清除缓存方法 
+        // 清除缓存方法 
         _clearCache: (clear) => {
-          clearCache = clear;
+          _clearCache = clear;
         },
       };
       fetchList(data).then((res) => {
         console.log("APP:::", res);
         list.value = res && res.data && res.data.list;
+        // if (time < 3) {
+        //   getList()
+        // }
       });
     };
     getList();

@@ -27,9 +27,9 @@ const timeInterval = 5 * 1000
 const getRequestCache = function (reqList, config) {
   const ci = reqList.getCache(config) // 获取缓存实例
   if (ci) { // 有缓存数据
-    ci.startLoading()
     const cur = new Date().getTime();
     if (cur < ci.expireDate) { // 判断缓存是否过期:没有过期
+      ci.startLoading()
       ci.setWeights() // 怎加权重
       CacheItem.endLoading(reqList, config) // 结束loading
       return Promise.resolve(ci.response)

@@ -22,13 +22,16 @@ export class CacheItem {
     // 清除缓存 初始化
     clearCacheInit(config) {
         if(config._clearCache) {
-            config._clearCache(this.clearSelf)
+            config._clearCache(this.clearSelf(this))
         }
     }
     
 
-    clearSelf() {
-        console.log('clearSelf', this);
+    clearSelf(that) {
+        return () => {
+            console.log('clearSelf', that);
+            that.expireDate = 0;
+        }
     }
 
     startLoading() {
@@ -36,12 +39,14 @@ export class CacheItem {
         this.loadingCallback(this.loading)
     }
     static endLoading(reqList, config) {
+       setTimeout(() => {
         const ci = reqList.getCache(config)
         const flag = ci.loading
         ci.loading = false
         if (flag && reqList.isLoading()) {
             ci.loadingCallback(ci.loading)
         }
+       }, 1);
     }
 
     // 设置时间
